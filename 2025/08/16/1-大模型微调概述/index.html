@@ -327,7 +327,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          2.7k 字
+          2.4k 字
         
       </span>
     
@@ -338,7 +338,7 @@
         
         
         
-          23 分钟
+          21 分钟
         
       </span>
     
@@ -415,21 +415,20 @@
 <li><strong>知识截止</strong>：预训练后无法获取新知识，存在知识时效性问题</li>
 <li><strong>行为对齐不足</strong>：模型可能生成不安全、不准确或不符合预期的内容</li>
 </ol>
-<h3 id="微调解决的问题"><a href="#微调解决的问题" class="headerlink" title="微调解决的问题"></a>微调解决的问题</h3><pre><code class=" mermaid">graph TD
-    subgraph Pre[&quot;预训练模型&quot;]
-        P1[&quot;大量通用知识 但缺乏专业深度&quot;]
-        P2[&quot;输出风格固定 难以定制化&quot;]
-        P3[&quot;知识有时效性限制&quot;]
+<h3 id="微调解决的问题"><a href="#微调解决的问题" class="headerlink" title="微调解决的问题"></a>微调解决的问题</h3><pre class="mermaid">graph TD
+    subgraph Pre["预训练模型"]
+        P1["大量通用知识 但缺乏专业深度"]
+        P2["输出风格固定 难以定制化"]
+        P3["知识有时效性限制"]
     end
-    Pre --&gt; FT[&quot;微调训练&lt;br/&gt;特定数据&quot;]
-    FT --&gt; Post
-    subgraph Post[&quot;微调后模型&quot;]
-        Q1[&quot;✓ 具备领域专业知识&quot;]
-        Q2[&quot;✓ 输出风格可定制&quot;]
-        Q3[&quot;✓ 可注入最新知识&quot;]
-        Q4[&quot;✓ 行为符合预期&quot;]
-    end
-</code></pre>
+    Pre --> FT["微调训练<br/>特定数据"]
+    FT --> Post
+    subgraph Post["微调后模型"]
+        Q1["✓ 具备领域专业知识"]
+        Q2["✓ 输出风格可定制"]
+        Q3["✓ 可注入最新知识"]
+        Q4["✓ 行为符合预期"]
+    end</pre>
 
 <h2 id="微调能做什么"><a href="#微调能做什么" class="headerlink" title="微调能做什么"></a>微调能做什么</h2><h3 id="1-领域知识注入"><a href="#1-领域知识注入" class="headerlink" title="1. 领域知识注入"></a>1. 领域知识注入</h3><p>让模型掌握特定领域的专业知识和术语：</p>
 <ul>
@@ -539,13 +538,12 @@
 <td>追求效率</td>
 </tr>
 </tbody></table>
-<h2 id="微调的工作流程"><a href="#微调的工作流程" class="headerlink" title="微调的工作流程"></a>微调的工作流程</h2><pre><code class=" mermaid">graph TD
-    S1[&quot;1. 选择模型&lt;br/&gt;选择合适的预训练模型作为起点&quot;] --&gt; S2[&quot;2. 准备数据&lt;br/&gt;收集、清洗、格式化训练数据&quot;]
-    S2 --&gt; S3[&quot;3. 配置训练&lt;br/&gt;设置超参数、选择微调方法&quot;]
-    S3 --&gt; S4[&quot;4. 执行训练&lt;br/&gt;运行训练脚本，监控指标&quot;]
-    S4 --&gt; S5[&quot;5. 评估模型&lt;br/&gt;测试模型效果，调整优化&quot;]
-    S5 --&gt; S6[&quot;6. 部署应用&lt;br/&gt;导出模型，部署到生产环境&quot;]
-</code></pre>
+<h2 id="微调的工作流程"><a href="#微调的工作流程" class="headerlink" title="微调的工作流程"></a>微调的工作流程</h2><pre class="mermaid">graph TD
+    S1["1. 选择模型<br/>选择合适的预训练模型作为起点"] --> S2["2. 准备数据<br/>收集、清洗、格式化训练数据"]
+    S2 --> S3["3. 配置训练<br/>设置超参数、选择微调方法"]
+    S3 --> S4["4. 执行训练<br/>运行训练脚本，监控指标"]
+    S4 --> S5["5. 评估模型<br/>测试模型效果，调整优化"]
+    S5 --> S6["6. 部署应用<br/>导出模型，部署到生产环境"]</pre>
 
 <h2 id="学习路线图"><a href="#学习路线图" class="headerlink" title="学习路线图"></a>学习路线图</h2><p>本教程将按以下顺序展开：</p>
 <figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><code class="hljs">基础篇<br>├── 第01章：大模型微调概述（本章）<br>├── 第02章：必备数学基础<br>├── 第03章：PyTorch 快速入门<br>└── 第04章：Transformer 架构深度解析<br>        │<br>        ▼<br>核心篇<br>├── 第05章：预训练与微调范式<br>├── 第06章：全参数微调<br>├── 第07章：LoRA 原理与数学推导<br>├── 第08章：QLoRA 量化微调<br>├── 第09章：DoRA 权重分解微调<br>└── 第10章：其他 PEFT 方法对比<br>        │<br>        ▼<br>实战篇<br>├── 第11章：环境搭建与云平台指南<br>├── 第12章：数据准备与格式处理<br>├── 第13章：实战：对话模型微调<br>├── 第14章：实战：垂直领域知识注入<br>└── 第15章：实战：代码生成模型微调<br>        │<br>        ▼<br>进阶篇<br>├── 第16章：RLHF 与 DPO 对齐技术<br>├── 第17章：多模态模型微调<br>├── 第18章：模型评估与效果分析<br>├── 第19章：分布式训练与 DeepSpeed<br>├── 第20章：模型部署与推理优化<br>└── 第21章：最佳实践与常见问题<br></code></pre></td></tr></table></figure>
