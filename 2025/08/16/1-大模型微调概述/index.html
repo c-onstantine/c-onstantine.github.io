@@ -27,7 +27,7 @@
 <meta property="og:description" content="01-大模型微调概述什么是大模型微调大模型微调（Fine-tuning）是指在预训练大语言模型的基础上，使用特定领域或任务的数据进行进一步训练，使模型更好地适应特定场景的过程。 预训练 vs 微调   阶段 数据规模 计算资源 目标    预训练 海量数据（TB级） 极高（数千GPU） 学习通用语言知识   微调 特定领域数据（GB级或更少） 较低（单卡或多卡） 适应特定任务或领域   一个形象的">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-08-16T07:00:00.000Z">
-<meta property="article:modified_time" content="2026-06-09T13:03:26.905Z">
+<meta property="article:modified_time" content="2026-06-09T14:11:54.625Z">
 <meta property="article:author" content="kk">
 <meta property="article:tag" content="AI">
 <meta property="article:tag" content="模型微调">
@@ -717,6 +717,21 @@
 
   
 
+
+
+  <script>
+  Fluid.utils.createScript('https://lib.baomitu.com/mermaid/8.14.0/mermaid.min.js', function() {
+    mermaid.initialize({"theme":"default"});
+
+    Fluid.utils.listenDOMLoaded(function() {
+      Fluid.events.registerRefreshCallback(function() {
+        if ('mermaid' in window) {
+          mermaid.init();
+        }
+      });
+    });
+  });
+</script>
 
 
 
