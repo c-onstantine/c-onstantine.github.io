@@ -333,15 +333,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2025/08/19/5-%E9%A2%84%E8%AE%AD%E7%BB%83%E4%B8%8E%E5%BE%AE%E8%B0%83%E8%8C%83%E5%BC%8F/" target="_self">
-          5-预训练与微调范式
+        <a href="/2025/08/21/8-QLoRA%20%E9%87%8F%E5%8C%96%E5%BE%AE%E8%B0%83/" target="_self">
+          6-全参数微调
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2025/08/19/5-%E9%A2%84%E8%AE%AD%E7%BB%83%E4%B8%8E%E5%BE%AE%E8%B0%83%E8%8C%83%E5%BC%8F/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2025/08/21/8-QLoRA%20%E9%87%8F%E5%8C%96%E5%BE%AE%E8%B0%83/" target="_self">
         <div>
-          05-预训练与微调范式现代大语言模型的训练遵循”预训练 + 微调”的两阶段范式。理解这一范式对于掌握微调技术至关重要。 5.1 预训练：构建通用知识什么是预训练预训练是在海量无标注文本上，让模型学习语言的通用规律和知识。 12345678预训练数据示例：- 互联网文本（网页、博客、论坛）- 书籍（小说、教材、专业书籍）- 代码仓库（GitHub）- 维基百科- 新闻文章数据规模：TB 级别（万亿
+          08-QLoRA 量化微调QLoRA（Quantized LoRA）在 LoRA 基础上引入 4-bit 量化技术，将大模型微调的显存需求降低到消费级 GPU 可承受的范围。 8.1 QLoRA 的创新点核心技术QLoRA 引入了三项关键技术：    技术 作用 效果    4-bit NormalFloat 新的量化数据类型 更精确的量化   双重量化 对量化参数再量化 额外节省显存   分页优
         </div>
       </a>
 
@@ -349,8 +349,78 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2025-08-19 19:21" pubdate>
-              2025-08-19
+            <time datetime="2025-08-21 16:21" pubdate>
+              2025-08-21
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/AI/" class="category-chain-item">AI</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/AI/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/" class="category-chain-item">大模型微调</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/AI/">#AI</a>
+            
+              <a href="/tags/%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/">#模型微调</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/2025/08/20/7-LoRA%20%E5%8E%9F%E7%90%86%E4%B8%8E%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC/" target="_self">
+          7-LLoRA 原理与数学推导
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2025/08/20/7-LoRA%20%E5%8E%9F%E7%90%86%E4%B8%8E%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC/" target="_self">
+        <div>
+          07-LoRA 原理与数学推导LoRA（Low-Rank Adaptation）是目前最流行的参数高效微调方法。本章将深入讲解 LoRA 的原理、数学推导和实践应用。 7.1 LoRA 的核心思想问题背景全参数微调需要更新所有参数，资源消耗大。能否用更少的参数达到类似效果？ LoRA 的假设关键假设：模型适应新任务时，参数更新量 ΔW 具有低”内在秩”。 12345678数学表达：ΔW ∈ ℝ^(
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2025-08-20 19:31" pubdate>
+              2025-08-20
             </time>
           </div>
         
@@ -412,6 +482,146 @@
       <a class="index-excerpt index-excerpt__noimg" href="/2025/08/19/4-Transformer%E6%9E%B6%E6%9E%84%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/" target="_self">
         <div>
           04-Transformer 架构深度解析Transformer 是现代大语言模型的基石架构。理解 Transformer 对于掌握微调技术至关重要，因为微调本质上是在调整 Transformer 的参数。 4.1 Transformer 的诞生背景从 RNN 到 Transformer   特性 RNN&#x2F;LSTM Transformer    并行计算 ❌ 顺序处理 ✅ 完全并行
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2025-08-19 19:21" pubdate>
+              2025-08-19
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/AI/" class="category-chain-item">AI</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/AI/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/" class="category-chain-item">大模型微调</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/AI/">#AI</a>
+            
+              <a href="/tags/%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/">#模型微调</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/2025/08/19/6-%E5%85%A8%E5%8F%82%E6%95%B0%E5%BE%AE%E8%B0%83/" target="_self">
+          6-全参数微调
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2025/08/19/6-%E5%85%A8%E5%8F%82%E6%95%B0%E5%BE%AE%E8%B0%83/" target="_self">
+        <div>
+          06-全参数微调全参数微调（Full Fine-tuning）是最直接的微调方式，更新模型的全部参数。虽然资源需求大，但理解它是学习高效微调方法的基础。 6.1 什么是全参数微调定义全参数微调在训练过程中更新模型的所有权重： 12345原始模型参数：W微调后参数：W&#x27; = W + ΔW其中 ΔW 通过梯度下降学习得到：ΔW = -η × ∂L/∂W（对每个参数）  对比   方法 更新参
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2025-08-19 19:21" pubdate>
+              2025-08-19
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/AI/" class="category-chain-item">AI</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/AI/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/" class="category-chain-item">大模型微调</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/AI/">#AI</a>
+            
+              <a href="/tags/%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/">#模型微调</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/2025/08/19/5-%E9%A2%84%E8%AE%AD%E7%BB%83%E4%B8%8E%E5%BE%AE%E8%B0%83%E8%8C%83%E5%BC%8F/" target="_self">
+          5-预训练与微调范式
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2025/08/19/5-%E9%A2%84%E8%AE%AD%E7%BB%83%E4%B8%8E%E5%BE%AE%E8%B0%83%E8%8C%83%E5%BC%8F/" target="_self">
+        <div>
+          05-预训练与微调范式现代大语言模型的训练遵循”预训练 + 微调”的两阶段范式。理解这一范式对于掌握微调技术至关重要。 5.1 预训练：构建通用知识什么是预训练预训练是在海量无标注文本上，让模型学习语言的通用规律和知识。 12345678预训练数据示例：- 互联网文本（网页、博客、论坛）- 书籍（小说、教材、专业书籍）- 代码仓库（GitHub）- 维基百科- 新闻文章数据规模：TB 级别（万亿
         </div>
       </a>
 

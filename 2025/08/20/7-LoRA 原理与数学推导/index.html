@@ -1,0 +1,990 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="kk">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="07-LoRA 原理与数学推导LoRA（Low-Rank Adaptation）是目前最流行的参数高效微调方法。本章将深入讲解 LoRA 的原理、数学推导和实践应用。 7.1 LoRA 的核心思想问题背景全参数微调需要更新所有参数，资源消耗大。能否用更少的参数达到类似效果？ LoRA 的假设关键假设：模型适应新任务时，参数更新量 ΔW 具有低”内在秩”。 12345678数学表达：ΔW ∈ ℝ^(">
+<meta property="og:type" content="article">
+<meta property="og:title" content="7-LLoRA 原理与数学推导">
+<meta property="og:url" content="http://example.com/2025/08/20/7-LoRA%20%E5%8E%9F%E7%90%86%E4%B8%8E%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC/index.html">
+<meta property="og:site_name" content="康康的博客">
+<meta property="og:description" content="07-LoRA 原理与数学推导LoRA（Low-Rank Adaptation）是目前最流行的参数高效微调方法。本章将深入讲解 LoRA 的原理、数学推导和实践应用。 7.1 LoRA 的核心思想问题背景全参数微调需要更新所有参数，资源消耗大。能否用更少的参数达到类似效果？ LoRA 的假设关键假设：模型适应新任务时，参数更新量 ΔW 具有低”内在秩”。 12345678数学表达：ΔW ∈ ℝ^(">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-08-20T11:31:27.000Z">
+<meta property="article:modified_time" content="2026-06-13T08:43:27.349Z">
+<meta property="article:author" content="kk">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="模型微调">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>7-LLoRA 原理与数学推导 - 康康的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.2"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>康康的博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="7-LLoRA 原理与数学推导"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-08-20 19:31" pubdate>
+          2025年8月20日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          6.3k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          53 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">7-LLoRA 原理与数学推导</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="07-LoRA-原理与数学推导"><a href="#07-LoRA-原理与数学推导" class="headerlink" title="07-LoRA 原理与数学推导"></a>07-LoRA 原理与数学推导</h1><p>LoRA（Low-Rank Adaptation）是目前最流行的参数高效微调方法。本章将深入讲解 LoRA 的原理、数学推导和实践应用。</p>
+<h2 id="7-1-LoRA-的核心思想"><a href="#7-1-LoRA-的核心思想" class="headerlink" title="7.1 LoRA 的核心思想"></a>7.1 LoRA 的核心思想</h2><h3 id="问题背景"><a href="#问题背景" class="headerlink" title="问题背景"></a>问题背景</h3><p>全参数微调需要更新所有参数，资源消耗大。能否用更少的参数达到类似效果？</p>
+<h3 id="LoRA-的假设"><a href="#LoRA-的假设" class="headerlink" title="LoRA 的假设"></a>LoRA 的假设</h3><p><strong>关键假设</strong>：模型适应新任务时，参数更新量 ΔW 具有低”内在秩”。</p>
+<figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs asciidoc">数学表达：<br>ΔW ∈ ℝ^(d×d) 可以分解为：<br>ΔW = B × A<br><br>其中：<br><span class="hljs-bullet">- </span>B ∈ ℝ^(d×r)<br><span class="hljs-bullet">- </span>A ∈ ℝ^(r×d)<br><span class="hljs-bullet">- </span>r &lt;&lt; d（秩远小于维度）<br></code></pre></td></tr></table></figure>
+
+<h3 id="直观理解"><a href="#直观理解" class="headerlink" title="直观理解"></a>直观理解</h3><figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs asciidoc">类比：室内装修<br><br>全参数微调：<br><span class="hljs-bullet">- </span>拆掉所有墙壁，重新设计<br><span class="hljs-bullet">- </span>工程量大，成本高<br><br>LoRA：<br><span class="hljs-bullet">- </span>保留原有结构<br><span class="hljs-bullet">- </span>只调整软装（窗帘、家具、装饰）<br><span class="hljs-bullet">- </span>工程量小，效果好<br><br>核心思想：<br>模型&quot;知识&quot;（高秩）不需要改<br>只需要调整&quot;行为模式&quot;（低秩）<br></code></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="7-2-LoRA-的数学推导"><a href="#7-2-LoRA-的数学推导" class="headerlink" title="7.2 LoRA 的数学推导"></a>7.2 LoRA 的数学推导</h2><h3 id="线性层的微调"><a href="#线性层的微调" class="headerlink" title="线性层的微调"></a>线性层的微调</h3><p>考虑一个线性层：<code>Y = XW</code></p>
+<p>微调后：<code>Y = X(W + ΔW)</code></p>
+<p><strong>全参数微调</strong>：直接学习 ΔW（d×d 矩阵）</p>
+<p><strong>LoRA</strong>：分解 ΔW &#x3D; BA</p>
+<figure class="highlight tp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs tp"><span class="hljs-keyword">Y</span> = <span class="hljs-keyword">X</span>(<span class="hljs-keyword">W</span> + BA)<br>  = XW + XBA<br><br>其中：<br>- <span class="hljs-keyword">W</span>：原始权重（冻结，不更新）<br>- B、A：LoRA 参数（训练更新）<br></code></pre></td></tr></table></figure>
+
+<h3 id="参数量对比"><a href="#参数量对比" class="headerlink" title="参数量对比"></a>参数量对比</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs powershell">原始参数：d × d<br><br>LoRA 参数：d × <span class="hljs-built_in">r</span> + <span class="hljs-built_in">r</span> × d = <span class="hljs-number">2</span>dr<br><br>压缩比：d² / <span class="hljs-number">2</span>dr = d / <span class="hljs-number">2</span><span class="hljs-built_in">r</span><br><br>示例：<br>d = <span class="hljs-number">4096</span>, <span class="hljs-built_in">r</span> = <span class="hljs-number">8</span><br>压缩比 = <span class="hljs-number">4096</span> / <span class="hljs-number">16</span> = <span class="hljs-number">256</span> 倍<br></code></pre></td></tr></table></figure>
+
+<h3 id="前向传播计算"><a href="#前向传播计算" class="headerlink" title="前向传播计算"></a>前向传播计算</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> torch<br><span class="hljs-keyword">import</span> torch.nn <span class="hljs-keyword">as</span> nn<br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">LoRALinear</span>(nn.Module):<br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, in_features, out_features, rank=<span class="hljs-number">8</span>, alpha=<span class="hljs-number">16</span></span>):<br>        <span class="hljs-built_in">super</span>().__init__()<br>        <br>        <span class="hljs-comment"># 原始线性层（冻结）</span><br>        <span class="hljs-variable language_">self</span>.original = nn.Linear(in_features, out_features, bias=<span class="hljs-literal">False</span>)<br>        <span class="hljs-variable language_">self</span>.original.weight.requires_grad = <span class="hljs-literal">False</span><br>        <br>        <span class="hljs-comment"># LoRA 参数</span><br>        <span class="hljs-variable language_">self</span>.lora_A = nn.Parameter(torch.zeros(rank, in_features))<br>        <span class="hljs-variable language_">self</span>.lora_B = nn.Parameter(torch.zeros(out_features, rank))<br>        <br>        <span class="hljs-comment"># 缩放因子</span><br>        <span class="hljs-variable language_">self</span>.scaling = alpha / rank<br>        <br>        <span class="hljs-comment"># 初始化</span><br>        nn.init.kaiming_uniform_(<span class="hljs-variable language_">self</span>.lora_A, a=<span class="hljs-number">5</span>**<span class="hljs-number">0.5</span>)<br>        nn.init.zeros_(<span class="hljs-variable language_">self</span>.lora_B)  <span class="hljs-comment"># B 初始化为 0，确保初始时 LoRA 不起作用</span><br>    <br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x</span>):<br>        <span class="hljs-comment"># 原始计算</span><br>        result = <span class="hljs-variable language_">self</span>.original(x)<br>        <br>        <span class="hljs-comment"># LoRA 增量</span><br>        lora_output = (x @ <span class="hljs-variable language_">self</span>.lora_A.T @ <span class="hljs-variable language_">self</span>.lora_B.T) * <span class="hljs-variable language_">self</span>.scaling<br>        <br>        <span class="hljs-keyword">return</span> result + lora_output<br><br><span class="hljs-comment"># 示例</span><br>lora_layer = LoRALinear(<span class="hljs-number">4096</span>, <span class="hljs-number">4096</span>, rank=<span class="hljs-number">8</span>)<br>x = torch.randn(<span class="hljs-number">2</span>, <span class="hljs-number">10</span>, <span class="hljs-number">4096</span>)<br>y = lora_layer(x)<br><span class="hljs-built_in">print</span>(y.shape)  <span class="hljs-comment"># (2, 10, 4096)</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="为什么初始化-B-0"><a href="#为什么初始化-B-0" class="headerlink" title="为什么初始化 B&#x3D;0"></a>为什么初始化 B&#x3D;0</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># 初始化 B = 0</span><br><span class="hljs-comment"># 初始时 ΔW = B × A = 0 × A = 0</span><br><span class="hljs-comment"># 模型输出 = XW + XBA = XW（与原始模型一致）</span><br><br><span class="hljs-comment"># 这样确保：</span><br><span class="hljs-comment"># 1. 微调开始时，模型行为与预训练模型相同</span><br><span class="hljs-comment"># 2. 训练过程平稳，不会引入随机噪声</span><br></code></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="7-3-LoRA-的完整结构"><a href="#7-3-LoRA-的完整结构" class="headerlink" title="7.3 LoRA 的完整结构"></a>7.3 LoRA 的完整结构</h2><h3 id="在-Transformer-中的应用"><a href="#在-Transformer-中的应用" class="headerlink" title="在 Transformer 中的应用"></a>在 Transformer 中的应用</h3><p>LoRA 通常应用于注意力层的 Q、K、V、O 投影矩阵：</p>
+<pre class="mermaid">graph TD
+    subgraph MHA["Multi-Head Attention"]
+        Q["Q = X × W_q ← LoRA 应用点"]
+        K["K = X × W_k ← LoRA 应用点"]
+        V["V = X × W_v ← LoRA 应用点"]
+        O["O = Attn × W_o ← LoRA 应用点"]
+    end
+    subgraph FFN["Feed Forward"]
+        W1["W₁, W₂ ← 可选的 LoRA 应用点"]
+    end
+    MHA --> FFN</pre>
+
+<h3 id="实践中的配置"><a href="#实践中的配置" class="headerlink" title="实践中的配置"></a>实践中的配置</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># 典型的 LoRA 配置（2025+ 推荐）</span><br>lora_config = &#123;<br>    <span class="hljs-string">&quot;r&quot;</span>: <span class="hljs-number">16</span>,             <span class="hljs-comment"># LoRA 秩（16 是当前推荐默认值）</span><br>    <span class="hljs-string">&quot;lora_alpha&quot;</span>: <span class="hljs-number">32</span>,    <span class="hljs-comment"># 缩放因子（通常 alpha = 2*r）</span><br>    <span class="hljs-string">&quot;target_modules&quot;</span>: <span class="hljs-string">&quot;all-linear&quot;</span>,  <span class="hljs-comment"># 应用到所有线性层（推荐写法）</span><br>    <span class="hljs-comment"># 或手动指定（含 MLP 层效果更好）：</span><br>    <span class="hljs-comment"># &quot;target_modules&quot;: [</span><br>    <span class="hljs-comment">#     &quot;q_proj&quot;, &quot;k_proj&quot;, &quot;v_proj&quot;, &quot;o_proj&quot;,</span><br>    <span class="hljs-comment">#     &quot;gate_proj&quot;, &quot;up_proj&quot;, &quot;down_proj&quot;,</span><br>    <span class="hljs-comment"># ],</span><br>    <span class="hljs-string">&quot;lora_dropout&quot;</span>: <span class="hljs-number">0.05</span>,  <span class="hljs-comment"># Dropout</span><br>    <span class="hljs-string">&quot;bias&quot;</span>: <span class="hljs-string">&quot;none&quot;</span>,        <span class="hljs-comment"># 不训练 bias</span><br>    <span class="hljs-string">&quot;use_rslora&quot;</span>: <span class="hljs-literal">True</span>,    <span class="hljs-comment"># 启用 Rank-Stabilized LoRA（推荐）</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="高级配置选项"><a href="#高级配置选项" class="headerlink" title="高级配置选项"></a>高级配置选项</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># rsLoRA（Rank-Stabilized LoRA）：高秩时效果更好</span><br>lora_config_rslora = &#123;<br>    <span class="hljs-string">&quot;r&quot;</span>: <span class="hljs-number">64</span>,<br>    <span class="hljs-string">&quot;lora_alpha&quot;</span>: <span class="hljs-number">64</span>,<br>    <span class="hljs-string">&quot;use_rslora&quot;</span>: <span class="hljs-literal">True</span>,   <span class="hljs-comment"># 启用 rsLoRA</span><br>    <span class="hljs-string">&quot;target_modules&quot;</span>: [<span class="hljs-string">&quot;q_proj&quot;</span>, <span class="hljs-string">&quot;v_proj&quot;</span>],<br>&#125;<br><br><span class="hljs-comment"># PiSSA 初始化：加速收敛，效果更好</span><br>lora_config_pissa = &#123;<br>    <span class="hljs-string">&quot;r&quot;</span>: <span class="hljs-number">16</span>,<br>    <span class="hljs-string">&quot;lora_alpha&quot;</span>: <span class="hljs-number">32</span>,<br>    <span class="hljs-string">&quot;init_lora_weights&quot;</span>: <span class="hljs-string">&quot;pissa&quot;</span>,  <span class="hljs-comment"># PiSSA 初始化</span><br>    <span class="hljs-string">&quot;target_modules&quot;</span>: [<span class="hljs-string">&quot;q_proj&quot;</span>, <span class="hljs-string">&quot;v_proj&quot;</span>],<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="7-4-LoRA-的缩放因子-α"><a href="#7-4-LoRA-的缩放因子-α" class="headerlink" title="7.4 LoRA 的缩放因子 α"></a>7.4 LoRA 的缩放因子 α</h2><h3 id="作用"><a href="#作用" class="headerlink" title="作用"></a>作用</h3><figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs stylus">LoRA 输出 = (X @ A<span class="hljs-selector-class">.T</span> @ B.T) × (α / <span class="hljs-attribute">r</span>)<br><br>α / <span class="hljs-attribute">r</span> 是缩放因子，用于控制 LoRA 的影响程度<br></code></pre></td></tr></table></figure>
+
+<h3 id="为什么需要缩放"><a href="#为什么需要缩放" class="headerlink" title="为什么需要缩放"></a>为什么需要缩放</h3><figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs asciidoc">问题：<br><span class="hljs-bullet">- </span>不同的 rank r 会产生不同量级的 ΔW<br><span class="hljs-bullet">- </span>需要统一缩放，便于超参数调节<br><br>解决方案：<br><span class="hljs-bullet">- </span>引入 α 参数<br><span class="hljs-bullet">- </span>实际缩放 = α / r<br><span class="hljs-bullet">- </span>调整 α 时，不需要重新调整学习率<br></code></pre></td></tr></table></figure>
+
+<h3 id="常见设置"><a href="#常见设置" class="headerlink" title="常见设置"></a>常见设置</h3><figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs abnf">典型设置：α <span class="hljs-operator">=</span> <span class="hljs-number">2</span> × r<br><br><span class="hljs-attribute">r</span> <span class="hljs-operator">=</span> <span class="hljs-number">8</span>  → α <span class="hljs-operator">=</span> <span class="hljs-number">16</span>  → 缩放 <span class="hljs-operator">=</span> <span class="hljs-number">2</span><br><span class="hljs-attribute">r</span> <span class="hljs-operator">=</span> <span class="hljs-number">16</span> → α <span class="hljs-operator">=</span> <span class="hljs-number">32</span>  → 缩放 <span class="hljs-operator">=</span> <span class="hljs-number">2</span><br><span class="hljs-attribute">r</span> <span class="hljs-operator">=</span> <span class="hljs-number">32</span> → α <span class="hljs-operator">=</span> <span class="hljs-number">64</span>  → 缩放 <span class="hljs-operator">=</span> <span class="hljs-number">2</span><br><br>这样不同 rank 的 LoRA 输出量级相同<br></code></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="7-5-秩-r-的选择"><a href="#7-5-秩-r-的选择" class="headerlink" title="7.5 秩 r 的选择"></a>7.5 秩 r 的选择</h2><h3 id="r-的影响"><a href="#r-的影响" class="headerlink" title="r 的影响"></a>r 的影响</h3><table>
+<thead>
+<tr>
+<th>r 值</th>
+<th>参数量</th>
+<th>表达能力</th>
+<th>计算开销</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>小（1-4）</td>
+<td>最少</td>
+<td>较弱</td>
+<td>最低</td>
+</tr>
+<tr>
+<td>中（8-16）</td>
+<td>适中</td>
+<td>良好</td>
+<td>适中</td>
+</tr>
+<tr>
+<td>大（32-64）</td>
+<td>较多</td>
+<td>较强</td>
+<td>较高</td>
+</tr>
+</tbody></table>
+<h3 id="选择建议"><a href="#选择建议" class="headerlink" title="选择建议"></a>选择建议</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs powershell">简单任务（风格调整、简单问答）：<br>- <span class="hljs-built_in">r</span> = <span class="hljs-number">4</span> ~ <span class="hljs-number">8</span><br><br>中等复杂度（领域知识、指令微调）：<br>- <span class="hljs-built_in">r</span> = <span class="hljs-number">8</span> ~ <span class="hljs-number">16</span>（当前推荐从 <span class="hljs-built_in">r</span>=<span class="hljs-number">16</span> 开始）<br><br>复杂任务（多任务、深度适配）：<br>- <span class="hljs-built_in">r</span> = <span class="hljs-number">16</span> ~ <span class="hljs-number">32</span>（<span class="hljs-number">32</span>B+ 模型可考虑 <span class="hljs-built_in">r</span>=<span class="hljs-number">64</span>）<br><br>极复杂任务：<br>- 考虑全参数微调或更大 <span class="hljs-built_in">r</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="实验方法"><a href="#实验方法" class="headerlink" title="实验方法"></a>实验方法</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># 从小秩开始实验</span><br>ranks = [<span class="hljs-number">4</span>, <span class="hljs-number">8</span>, <span class="hljs-number">16</span>, <span class="hljs-number">32</span>]<br><br><span class="hljs-keyword">for</span> r <span class="hljs-keyword">in</span> ranks:<br>    model = create_lora_model(rank=r)<br>    train(model)<br>    evaluate(model)<br>    <br><span class="hljs-comment"># 选择效果足够好的最小 r</span><br></code></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="7-6-LoRA-的梯度分析"><a href="#7-6-LoRA-的梯度分析" class="headerlink" title="7.6 LoRA 的梯度分析"></a>7.6 LoRA 的梯度分析</h2><h3 id="梯度计算"><a href="#梯度计算" class="headerlink" title="梯度计算"></a>梯度计算</h3><figure class="highlight tp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs tp">损失函数：L<br>LoRA 参数：A, B<br><br>∂L/∂B = ∂L/∂<span class="hljs-keyword">Y</span> × ∂<span class="hljs-keyword">Y</span>/∂B<br>       = ∂L/∂<span class="hljs-keyword">Y</span> × (<span class="hljs-keyword">X</span> @ A.T) × (α/r)<br><br>∂L/∂A = ∂L/∂<span class="hljs-keyword">Y</span> × ∂<span class="hljs-keyword">Y</span>/∂A<br>       = (α/r) × B.T × ∂L/∂<span class="hljs-keyword">Y</span>.T × <span class="hljs-keyword">X</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="参数更新"><a href="#参数更新" class="headerlink" title="参数更新"></a>参数更新</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># 伪代码</span><br><span class="hljs-comment"># 前向传播</span><br>Y = X @ W + (X @ A.T @ B.T) * scaling<br><br><span class="hljs-comment"># 反向传播</span><br>loss = compute_loss(Y, target)<br>loss.backward()<br><br><span class="hljs-comment"># 只有 A, B 的梯度被计算和更新</span><br><span class="hljs-comment"># W 的梯度虽然被计算，但不用于更新（冻结）</span><br></code></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="7-7-使用-PEFT-库实现-LoRA"><a href="#7-7-使用-PEFT-库实现-LoRA" class="headerlink" title="7.7 使用 PEFT 库实现 LoRA"></a>7.7 使用 PEFT 库实现 LoRA</h2><h3 id="安装和配置"><a href="#安装和配置" class="headerlink" title="安装和配置"></a>安装和配置</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">pip install peft transformers accelerate<br><span class="hljs-comment"># 可选：Unsloth（2026年主流，速度提升2x，显存降低70%）</span><br>pip install unsloth<br></code></pre></td></tr></table></figure>
+
+<h3 id="完整代码示例"><a href="#完整代码示例" class="headerlink" title="完整代码示例"></a>完整代码示例</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> AutoModelForCausalLM, AutoTokenizer<br><span class="hljs-keyword">from</span> peft <span class="hljs-keyword">import</span> LoraConfig, get_peft_model, TaskType<br><br><span class="hljs-comment"># 加载基础模型</span><br>model_name = <span class="hljs-string">&quot;Qwen/Qwen3-1.7B&quot;</span><br>model = AutoModelForCausalLM.from_pretrained(<br>    model_name,<br>    torch_dtype=torch.float16,<br>    device_map=<span class="hljs-string">&quot;auto&quot;</span>,<br>)<br>tokenizer = AutoTokenizer.from_pretrained(model_name)<br><br><span class="hljs-comment"># LoRA 配置（2025+ 推荐）</span><br>lora_config = LoraConfig(<br>    task_type=TaskType.CAUSAL_LM,<br>    r=<span class="hljs-number">16</span>,                            <span class="hljs-comment"># 推荐从 16 开始</span><br>    lora_alpha=<span class="hljs-number">32</span>,<br>    lora_dropout=<span class="hljs-number">0.05</span>,<br>    target_modules=<span class="hljs-string">&quot;all-linear&quot;</span>,      <span class="hljs-comment"># 应用到所有线性层</span><br>    bias=<span class="hljs-string">&quot;none&quot;</span>,<br>    use_rslora=<span class="hljs-literal">True</span>,                 <span class="hljs-comment"># 启用 Rank-Stabilized LoRA（推荐）</span><br>)<br><br><span class="hljs-comment"># 更多高级选项：</span><br><span class="hljs-comment"># init_lora_weights=&quot;pissa&quot;  # PiSSA 初始化（更快收敛）</span><br><br><br><span class="hljs-comment"># 应用 LoRA</span><br>model = get_peft_model(model, lora_config)<br><br><span class="hljs-comment"># 查看可训练参数</span><br>model.print_trainable_parameters()<br><span class="hljs-comment"># 输出示例：</span><br><span class="hljs-comment"># trainable params: 4,194,304 || all params: 1,782,571,008 || trainable%: 0.24%</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="使用-Unsloth（2026-年推荐）"><a href="#使用-Unsloth（2026-年推荐）" class="headerlink" title="使用 Unsloth（2026 年推荐）"></a>使用 Unsloth（2026 年推荐）</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> unsloth <span class="hljs-keyword">import</span> FastLanguageModel<br><span class="hljs-keyword">import</span> torch<br><br><span class="hljs-comment"># 加载模型（Unsloth 优化版）</span><br>model, tokenizer = FastLanguageModel.from_pretrained(<br>    model_name=<span class="hljs-string">&quot;Qwen/Qwen3-1.7B&quot;</span>,<br>    max_seq_length=<span class="hljs-number">2048</span>,<br>    dtype=torch.float16,<br>    load_in_4bit=<span class="hljs-literal">True</span>,  <span class="hljs-comment"># 4-bit 量化，进一步降低显存</span><br>)<br><br><span class="hljs-comment"># 应用 LoRA</span><br>model = FastLanguageModel.get_peft_model(<br>    model,<br>    r=<span class="hljs-number">16</span>,<br>    lora_alpha=<span class="hljs-number">32</span>,<br>    target_modules=[<span class="hljs-string">&quot;q_proj&quot;</span>, <span class="hljs-string">&quot;k_proj&quot;</span>, <span class="hljs-string">&quot;v_proj&quot;</span>, <span class="hljs-string">&quot;o_proj&quot;</span>,<br>                    <span class="hljs-string">&quot;gate_proj&quot;</span>, <span class="hljs-string">&quot;up_proj&quot;</span>, <span class="hljs-string">&quot;down_proj&quot;</span>],<br>    lora_dropout=<span class="hljs-number">0</span>,<br>    bias=<span class="hljs-string">&quot;none&quot;</span>,<br>    use_gradient_checkpointing=<span class="hljs-literal">True</span>,<br>)<br><br><span class="hljs-comment"># 训练（Unsloth 自动优化）</span><br><span class="hljs-comment"># ... 训练代码相同，但速度和显存效率大幅提升</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="训练循环"><a href="#训练循环" class="headerlink" title="训练循环"></a>训练循环</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> TrainingArguments, Trainer<br><br>training_args = TrainingArguments(<br>    output_dir=<span class="hljs-string">&quot;./lora_output&quot;</span>,<br>    num_train_epochs=<span class="hljs-number">3</span>,<br>    per_device_train_batch_size=<span class="hljs-number">4</span>,<br>    learning_rate=<span class="hljs-number">1e-4</span>,<br>    fp16=<span class="hljs-literal">True</span>,<br>    logging_steps=<span class="hljs-number">10</span>,<br>    save_steps=<span class="hljs-number">500</span>,<br>)<br><br>trainer = Trainer(<br>    model=model,<br>    args=training_args,<br>    train_dataset=tokenized_dataset,<br>)<br><br>trainer.train()<br></code></pre></td></tr></table></figure>
+
+<h3 id="保存和加载-LoRA"><a href="#保存和加载-LoRA" class="headerlink" title="保存和加载 LoRA"></a>保存和加载 LoRA</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># 保存 LoRA 权重（只保存增量部分）</span><br>model.save_pretrained(<span class="hljs-string">&quot;./lora_adapter&quot;</span>)<br><br><span class="hljs-comment"># 加载</span><br><span class="hljs-keyword">from</span> peft <span class="hljs-keyword">import</span> PeftModel<br><br><span class="hljs-comment"># 加载基础模型</span><br>base_model = AutoModelForCausalLM.from_pretrained(model_name)<br><br><span class="hljs-comment"># 加载 LoRA 适配器</span><br>model = PeftModel.from_pretrained(base_model, <span class="hljs-string">&quot;./lora_adapter&quot;</span>)<br></code></pre></td></tr></table></figure>
+
+<h3 id="合并-LoRA-到基础模型"><a href="#合并-LoRA-到基础模型" class="headerlink" title="合并 LoRA 到基础模型"></a>合并 LoRA 到基础模型</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># 将 LoRA 权重合并到基础模型</span><br>merged_model = model.merge_and_unload()<br><br><span class="hljs-comment"># 保存合并后的模型</span><br>merged_model.save_pretrained(<span class="hljs-string">&quot;./merged_model&quot;</span>)<br>tokenizer.save_pretrained(<span class="hljs-string">&quot;./merged_model&quot;</span>)<br></code></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="7-8-LoRA-的优势总结"><a href="#7-8-LoRA-的优势总结" class="headerlink" title="7.8 LoRA 的优势总结"></a>7.8 LoRA 的优势总结</h2><table>
+<thead>
+<tr>
+<th>优势</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>参数效率</td>
+<td>只训练 0.1%~1% 的参数</td>
+</tr>
+<tr>
+<td>显存友好</td>
+<td>大幅降低训练显存需求</td>
+</tr>
+<tr>
+<td>无推理延迟</td>
+<td>合并后与原始模型相同</td>
+</tr>
+<tr>
+<td>模块化</td>
+<td>可以训练多个适配器，按需切换</td>
+</tr>
+<tr>
+<td>避免灾难性遗忘</td>
+<td>原始权重不变</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="本章小结"><a href="#本章小结" class="headerlink" title="本章小结"></a>本章小结</h2><table>
+<thead>
+<tr>
+<th>要点</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>核心假设</td>
+<td>ΔW 具有低秩结构</td>
+</tr>
+<tr>
+<td>分解方式</td>
+<td>ΔW &#x3D; BA，r &lt;&lt; d</td>
+</tr>
+<tr>
+<td>参数量</td>
+<td>2dr vs d²，压缩比 d&#x2F;2r</td>
+</tr>
+<tr>
+<td>缩放因子</td>
+<td>α&#x2F;r 控制 LoRA 输出量级</td>
+</tr>
+<tr>
+<td>秩选择</td>
+<td>简单任务 r&#x3D;4<del>8，复杂任务 r&#x3D;16</del>32</td>
+</tr>
+<tr>
+<td>初始化</td>
+<td>B&#x3D;0 确保初始行为不变</td>
+</tr>
+</tbody></table>
+<h2 id="练习"><a href="#练习" class="headerlink" title="练习"></a>练习</h2><ol>
+<li>推导 LoRA 参数 A、B 的梯度公式</li>
+<li>实现一个简单的 LoRA Linear 层</li>
+<li>对比不同 rank (4, 8, 16, 32) 的微调效果</li>
+</ol>
+<h2 id="下一步"><a href="#下一步" class="headerlink" title="下一步"></a>下一步</h2><p>下一章我们将学习 QLoRA，它在 LoRA 的基础上引入量化技术，进一步降低显存需求，让消费级 GPU 也能微调大模型。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/AI/" class="category-chain-item">AI</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/AI/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/" class="category-chain-item">大模型微调</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/AI/" class="print-no-link">#AI</a>
+      
+        <a href="/tags/%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/" class="print-no-link">#模型微调</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>7-LLoRA 原理与数学推导</div>
+      <div>http://example.com/2025/08/20/7-LoRA 原理与数学推导/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>kk</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年8月20日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/08/21/8-QLoRA%20%E9%87%8F%E5%8C%96%E5%BE%AE%E8%B0%83/" title="6-全参数微调">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">6-全参数微调</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/08/19/4-Transformer%E6%9E%B6%E6%9E%84%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/" title="4-Transformer架构深度解析">
+                        <span class="hidden-mobile">4-Transformer架构深度解析</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
